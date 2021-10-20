@@ -59,8 +59,8 @@ namespace GoogleFormExporter
                 var dates = list.Select(x => x.Date).OrderBy(x=>x).Distinct().ToList();
                 foreach (var date in dates)
                 {
-                    //var foods = list.Where(x=>x.Date == date && x.Food != "NO ORDER FOR THIS DAY" && !x.Food.Contains(",")).Select(x => x.Food).Distinct().ToList();
-                    var foodss = list.Where(x=>x.Date == date && x.Food != "NO ORDER FOR THIS DAY").Select(x => x.Food.Split(',').Where(y=>y!= "NO ORDER FOR THIS DAY")).ToList();
+                    //var foods = list.Where(x=>x.Date == date && x.Food != "NO ORDER FOR THIS DAY" && !x.Food.Contains(";")).Select(x => x.Food).Distinct().ToList();
+                    var foodss = list.Where(x=>x.Date == date && x.Food != "NO ORDER FOR THIS DAY").Select(x => x.Food.Split(';').Where(y=>y!= "NO ORDER FOR THIS DAY")).ToList();
                     var foods = new List<string>();
                     foreach (var items in foodss)
                     {
@@ -71,7 +71,7 @@ namespace GoogleFormExporter
                     }
                     var rooms = list.Where(x => x.Date == date).Select(x => x.RoomNumber).Distinct().ToList();
                     var sheet = excel.Workbook.Worksheets.Add(date);
-                    sheet.Cells[1, 1].Value = date;
+                    sheet.Cells[1, 2].Value = date;
                     var row = 1;
                     foreach (var food in foods.Select(x => x.Substring(0, x.IndexOf(x.ToCharArray().First(char.IsDigit)))).Distinct())
                     {
@@ -92,16 +92,32 @@ namespace GoogleFormExporter
                     row = 9;
                     var roomStart = 9;
                     Person previousValue = null;
+                    var currentRow = row - 1;
+                    var rowFinal = row;
+                    var rowsToAdd = 1;
                     foreach (var room in rooms)
                     {
                         foreach (var person in list.Where(x=>x.Date == date && x.RoomNumber == room))
                         {
-                            var currentRow = row - 1;
-                            var rowFinal = row;
-                            var rowsToAdd = 1;
+                            currentRow = row - 1;
+                            rowFinal = row;
+                            rowsToAdd = 1;
+                            //if (row % 55 == 0)
+                            //{
+                            //    while (!string.IsNullOrWhiteSpace(sheet.Cells[currentRow, 3].Value?.ToString()) || !string.IsNullOrWhiteSpace(sheet.Cells[currentRow, 2].Value?.ToString()) || !string.IsNullOrWhiteSpace(sheet.Cells[currentRow, 4].Value?.ToString()))
+                            //    {
+                            //        rowsToAdd++;
+                            //        currentRow--;
+                            //    }
+                            //    sheet.InsertRow(currentRow + 1, rowsToAdd);
+                            //    row = rowFinal + rowsToAdd;
+                            //}
                             if (row % 56 == 0)
                             {
-                                while (!string.IsNullOrWhiteSpace(sheet.Cells[currentRow, 3].Value?.ToString()))
+                                var a = !string.IsNullOrWhiteSpace(sheet.Cells[currentRow, 2].Value?.ToString()) ? sheet.Cells[currentRow, 2].Value?.ToString() : "";
+                                var b = !string.IsNullOrWhiteSpace(sheet.Cells[currentRow, 3].Value?.ToString()) ? sheet.Cells[currentRow, 3].Value?.ToString() : "";
+                                var c = !string.IsNullOrWhiteSpace(sheet.Cells[currentRow, 4].Value?.ToString()) ? sheet.Cells[currentRow, 4].Value?.ToString() : "";
+                                while (!string.IsNullOrWhiteSpace(sheet.Cells[currentRow, 3].Value?.ToString()) || !string.IsNullOrWhiteSpace(sheet.Cells[currentRow, 2].Value?.ToString()) || !string.IsNullOrWhiteSpace(sheet.Cells[currentRow, 4].Value?.ToString()))
                                 {
                                     rowsToAdd++;
                                     currentRow--;
@@ -111,7 +127,7 @@ namespace GoogleFormExporter
                             }
                             else if (row % 57 == 0)
                             {
-                                while (!string.IsNullOrWhiteSpace(sheet.Cells[currentRow, 3].Value?.ToString()))
+                                while (!string.IsNullOrWhiteSpace(sheet.Cells[currentRow, 3].Value?.ToString()) || !string.IsNullOrWhiteSpace(sheet.Cells[currentRow, 2].Value?.ToString()) || !string.IsNullOrWhiteSpace(sheet.Cells[currentRow, 4].Value?.ToString()))
                                 {
                                     rowsToAdd++;
                                     currentRow--;
@@ -121,9 +137,9 @@ namespace GoogleFormExporter
                             }
                             if (previousValue == null || person.RoomNumber == previousValue.RoomNumber)
                             {
-                                if (person.Food.Contains(","))
+                                if (person.Food.Contains(";"))
                                 {
-                                    var foodList = person.Food.Split(',');
+                                    var foodList = person.Food.Split(';');
                                     sheet.Cells[row, 1].Value = person.RoomNumber;
                                     sheet.Cells[row, 2].Value = person.Name;
                                     sheet.Cells[row, 6].Value = person.Rice;
@@ -133,19 +149,22 @@ namespace GoogleFormExporter
                                         currentRow = row - 1;
                                         rowFinal = row;
                                         rowsToAdd = 1;
-                                        if (row % 55 == 0)
-                                        {
-                                            while (!string.IsNullOrWhiteSpace(sheet.Cells[currentRow, 3].Value?.ToString()))
-                                            {
-                                                rowsToAdd++;
-                                                currentRow--;
-                                            }
-                                            sheet.InsertRow(currentRow + 1, rowsToAdd);
-                                            row = rowFinal + rowsToAdd;
-                                        }
+                                        //if (row % 55 == 0)
+                                        //{
+                                        //    while (!string.IsNullOrWhiteSpace(sheet.Cells[currentRow, 3].Value?.ToString()) || !string.IsNullOrWhiteSpace(sheet.Cells[currentRow, 2].Value?.ToString()) || !string.IsNullOrWhiteSpace(sheet.Cells[currentRow, 4].Value?.ToString()))
+                                        //    {
+                                        //        rowsToAdd++;
+                                        //        currentRow--;
+                                        //    }
+                                        //    sheet.InsertRow(currentRow + 1, rowsToAdd);
+                                        //    row = rowFinal + rowsToAdd;
+                                        //}
                                         if (row % 56 == 0)
                                         {
-                                            while (!string.IsNullOrWhiteSpace(sheet.Cells[currentRow, 3].Value?.ToString()))
+                                            var a = !string.IsNullOrWhiteSpace(sheet.Cells[currentRow, 2].Value?.ToString()) ? sheet.Cells[currentRow, 2].Value?.ToString() : "";
+                                            var b = !string.IsNullOrWhiteSpace(sheet.Cells[currentRow, 3].Value?.ToString()) ? sheet.Cells[currentRow, 3].Value?.ToString() : "";
+                                            var c = !string.IsNullOrWhiteSpace(sheet.Cells[currentRow, 4].Value?.ToString()) ? sheet.Cells[currentRow, 4].Value?.ToString() : "";
+                                            while (!string.IsNullOrWhiteSpace(sheet.Cells[currentRow, 3].Value?.ToString()) || !string.IsNullOrWhiteSpace(sheet.Cells[currentRow, 2].Value?.ToString()) || !string.IsNullOrWhiteSpace(sheet.Cells[currentRow, 4].Value?.ToString()))
                                             {
                                                 rowsToAdd++;
                                                 currentRow--;
@@ -155,7 +174,10 @@ namespace GoogleFormExporter
                                         }
                                         else if (row % 57 == 0)
                                         {
-                                            while (!string.IsNullOrWhiteSpace(sheet.Cells[currentRow, 3].Value?.ToString()))
+                                            var a = !string.IsNullOrWhiteSpace(sheet.Cells[currentRow, 2].Value?.ToString()) ? sheet.Cells[currentRow, 2].Value?.ToString() : "";
+                                            var b = !string.IsNullOrWhiteSpace(sheet.Cells[currentRow, 3].Value?.ToString()) ? sheet.Cells[currentRow, 3].Value?.ToString() : "";
+                                            var c = !string.IsNullOrWhiteSpace(sheet.Cells[currentRow, 4].Value?.ToString()) ? sheet.Cells[currentRow, 4].Value?.ToString() : "";
+                                            while (!string.IsNullOrWhiteSpace(sheet.Cells[currentRow, 3].Value?.ToString()) || !string.IsNullOrWhiteSpace(sheet.Cells[currentRow, 2].Value?.ToString()) || !string.IsNullOrWhiteSpace(sheet.Cells[currentRow, 4].Value?.ToString()))
                                             {
                                                 rowsToAdd++;
                                                 currentRow--;
@@ -171,6 +193,39 @@ namespace GoogleFormExporter
                                 }
                                 else
                                 {
+                                    currentRow = row - 1;
+                                    rowFinal = row;
+                                    rowsToAdd = 1;
+                                    //if (row % 55 == 0)
+                                    //{
+                                    //    while (!string.IsNullOrWhiteSpace(sheet.Cells[currentRow, 3].Value?.ToString()) || !string.IsNullOrWhiteSpace(sheet.Cells[currentRow, 2].Value?.ToString()) || !string.IsNullOrWhiteSpace(sheet.Cells[currentRow, 4].Value?.ToString()))
+                                    //    {
+                                    //        rowsToAdd++;
+                                    //        currentRow--;
+                                    //    }
+                                    //    sheet.InsertRow(currentRow + 1, rowsToAdd);
+                                    //    row = rowFinal + rowsToAdd;
+                                    //}
+                                    if (row % 56 == 0)
+                                    {
+                                        while (!string.IsNullOrWhiteSpace(sheet.Cells[currentRow, 3].Value?.ToString()) || !string.IsNullOrWhiteSpace(sheet.Cells[currentRow, 2].Value?.ToString()) || !string.IsNullOrWhiteSpace(sheet.Cells[currentRow, 4].Value?.ToString()))
+                                        {
+                                            rowsToAdd++;
+                                            currentRow--;
+                                        }
+                                        sheet.InsertRow(currentRow + 1, rowsToAdd);
+                                        row = rowFinal + rowsToAdd;
+                                    }
+                                    else if (row % 57 == 0)
+                                    {
+                                        while (!string.IsNullOrWhiteSpace(sheet.Cells[currentRow, 3].Value?.ToString()) || !string.IsNullOrWhiteSpace(sheet.Cells[currentRow, 2].Value?.ToString()) || !string.IsNullOrWhiteSpace(sheet.Cells[currentRow, 4].Value?.ToString()))
+                                        {
+                                            rowsToAdd++;
+                                            currentRow--;
+                                        }
+                                        sheet.InsertRow(currentRow + 1, rowsToAdd);
+                                        row = rowFinal + rowsToAdd;
+                                    }
                                     sheet.Cells[row, 1].Value = person.RoomNumber;
                                     sheet.Cells[row, 2].Value = person.Name;
                                     var a = person.Food.Equals("NO ORDER FOR THIS DAY") ? "" :person.Food.Substring(0, person.Food.IndexOf(person.Food.ToCharArray().First(char.IsDigit))).Trim();
@@ -184,6 +239,72 @@ namespace GoogleFormExporter
                             }
                             else
                             {
+                                //currentRow = row - 1;
+                                //rowFinal = row;
+                                //rowsToAdd = 1;
+                                //if (row % 55 == 0)
+                                //{
+                                //    while (!string.IsNullOrWhiteSpace(sheet.Cells[currentRow, 3].Value?.ToString()) || !string.IsNullOrWhiteSpace(sheet.Cells[currentRow, 2].Value?.ToString()) || !string.IsNullOrWhiteSpace(sheet.Cells[currentRow, 4].Value?.ToString()))
+                                //    {
+                                //        rowsToAdd++;
+                                //        currentRow--;
+                                //    }
+                                //    sheet.InsertRow(currentRow + 1, rowsToAdd);
+                                //    row = rowFinal + rowsToAdd;
+                                //}
+                                //if (row % 56 == 0)
+                                //{
+                                //    while (!string.IsNullOrWhiteSpace(sheet.Cells[currentRow, 3].Value?.ToString()) || !string.IsNullOrWhiteSpace(sheet.Cells[currentRow, 2].Value?.ToString()) || !string.IsNullOrWhiteSpace(sheet.Cells[currentRow, 4].Value?.ToString()))
+                                //    {
+                                //        rowsToAdd++;
+                                //        currentRow--;
+                                //    }
+                                //    sheet.InsertRow(currentRow + 1, rowsToAdd);
+                                //    row = rowFinal + rowsToAdd;
+                                //}
+                                //else if (row % 57 == 0)
+                                //{
+                                //    while (!string.IsNullOrWhiteSpace(sheet.Cells[currentRow, 3].Value?.ToString()) || !string.IsNullOrWhiteSpace(sheet.Cells[currentRow, 2].Value?.ToString()) || !string.IsNullOrWhiteSpace(sheet.Cells[currentRow, 4].Value?.ToString()))
+                                //    {
+                                //        rowsToAdd++;
+                                //        currentRow--;
+                                //    }
+                                //    sheet.InsertRow(currentRow + 1, rowsToAdd);
+                                //    row = rowFinal + rowsToAdd;
+                                //}
+                                currentRow = row - 1;
+                                rowFinal = row;
+                                rowsToAdd = 1;
+                                //if (row % 55 == 0)
+                                //{
+                                //    while (!string.IsNullOrWhiteSpace(sheet.Cells[currentRow, 3].Value?.ToString()) || !string.IsNullOrWhiteSpace(sheet.Cells[currentRow, 2].Value?.ToString()) || !string.IsNullOrWhiteSpace(sheet.Cells[currentRow, 4].Value?.ToString()))
+                                //    {
+                                //        rowsToAdd++;
+                                //        currentRow--;
+                                //    }
+                                //    sheet.InsertRow(currentRow + 1, rowsToAdd);
+                                //    row = rowFinal + rowsToAdd;
+                                //}
+                                if (row % 56 == 0)
+                                {
+                                    while (!string.IsNullOrWhiteSpace(sheet.Cells[currentRow, 3].Value?.ToString()) || !string.IsNullOrWhiteSpace(sheet.Cells[currentRow, 2].Value?.ToString()) || !string.IsNullOrWhiteSpace(sheet.Cells[currentRow, 4].Value?.ToString()))
+                                    {
+                                        rowsToAdd++;
+                                        currentRow--;
+                                    }
+                                    sheet.InsertRow(currentRow + 1, rowsToAdd);
+                                    row = rowFinal + rowsToAdd;
+                                }
+                                else if (row % 57 == 0)
+                                {
+                                    while (!string.IsNullOrWhiteSpace(sheet.Cells[currentRow, 3].Value?.ToString()) || !string.IsNullOrWhiteSpace(sheet.Cells[currentRow, 2].Value?.ToString()) || !string.IsNullOrWhiteSpace(sheet.Cells[currentRow, 4].Value?.ToString()))
+                                    {
+                                        rowsToAdd++;
+                                        currentRow--;
+                                    }
+                                    sheet.InsertRow(currentRow + 1, rowsToAdd);
+                                    row = rowFinal + rowsToAdd;
+                                }
                                 sheet.Cells[row, 4].Formula = "=SUM(D" + roomStart + ":D" + (row - 1) + ")";
                                 sheet.Cells[row, 4].Style.Font.Color.SetColor(Color.White);
                                 sheet.Cells[row, 4].Style.Fill.PatternType = ExcelFillStyle.Solid;
@@ -195,9 +316,9 @@ namespace GoogleFormExporter
                                 row++;
                                 row++;
                                 roomStart = row;
-                                if (person.Food.Contains(","))
+                                if (person.Food.Contains(";"))
                                 {
-                                    var foodList = person.Food.Split(',');
+                                    var foodList = person.Food.Split(';');
                                     sheet.Cells[row, 1].Value = person.RoomNumber;
                                     sheet.Cells[row, 2].Value = person.Name;
                                     sheet.Cells[row, 6].Value = person.Rice;
@@ -207,19 +328,22 @@ namespace GoogleFormExporter
                                         currentRow = row - 1;
                                         rowFinal = row;
                                         rowsToAdd = 1;
-                                        if (row % 55 == 0)
-                                        {
-                                            while (!string.IsNullOrWhiteSpace(sheet.Cells[currentRow, 3].Value?.ToString()))
-                                            {
-                                                rowsToAdd++;
-                                                currentRow--;
-                                            }
-                                            sheet.InsertRow(currentRow + 1, rowsToAdd);
-                                            row = rowFinal + rowsToAdd;
-                                        }
+                                        //if (row % 55 == 0)
+                                        //{
+                                        //    while (!string.IsNullOrWhiteSpace(sheet.Cells[currentRow, 3].Value?.ToString()) || !string.IsNullOrWhiteSpace(sheet.Cells[currentRow, 2].Value?.ToString()) || !string.IsNullOrWhiteSpace(sheet.Cells[currentRow, 4].Value?.ToString()))
+                                        //    {
+                                        //        rowsToAdd++;
+                                        //        currentRow--;
+                                        //    }
+                                        //    sheet.InsertRow(currentRow + 1, rowsToAdd);
+                                        //    row = rowFinal + rowsToAdd;
+                                        //}
                                         if (row % 56 == 0)
                                         {
-                                            while (!string.IsNullOrWhiteSpace(sheet.Cells[currentRow, 3].Value?.ToString()))
+                                            var a = !string.IsNullOrWhiteSpace(sheet.Cells[currentRow, 2].Value?.ToString()) ? sheet.Cells[currentRow, 2].Value?.ToString() : "";
+                                            var b = !string.IsNullOrWhiteSpace(sheet.Cells[currentRow, 3].Value?.ToString()) ? sheet.Cells[currentRow, 3].Value?.ToString() : "";
+                                            var c = !string.IsNullOrWhiteSpace(sheet.Cells[currentRow, 4].Value?.ToString()) ? sheet.Cells[currentRow, 4].Value?.ToString() : "";
+                                            while (!string.IsNullOrWhiteSpace(sheet.Cells[currentRow, 3].Value?.ToString()) || !string.IsNullOrWhiteSpace(sheet.Cells[currentRow, 2].Value?.ToString()) || !string.IsNullOrWhiteSpace(sheet.Cells[currentRow, 4].Value?.ToString()))
                                             {
                                                 rowsToAdd++;
                                                 currentRow--;
@@ -229,7 +353,10 @@ namespace GoogleFormExporter
                                         }
                                         else if (row % 57 == 0)
                                         {
-                                            while (!string.IsNullOrWhiteSpace(sheet.Cells[currentRow, 3].Value?.ToString()))
+                                            var a = !string.IsNullOrWhiteSpace(sheet.Cells[currentRow, 2].Value?.ToString()) ? sheet.Cells[currentRow, 2].Value?.ToString() : "";
+                                            var b = !string.IsNullOrWhiteSpace(sheet.Cells[currentRow, 3].Value?.ToString()) ? sheet.Cells[currentRow, 3].Value?.ToString() : "";
+                                            var c = !string.IsNullOrWhiteSpace(sheet.Cells[currentRow, 4].Value?.ToString()) ? sheet.Cells[currentRow, 4].Value?.ToString() : "";
+                                            while (!string.IsNullOrWhiteSpace(sheet.Cells[currentRow, 3].Value?.ToString()) || !string.IsNullOrWhiteSpace(sheet.Cells[currentRow, 2].Value?.ToString()) || !string.IsNullOrWhiteSpace(sheet.Cells[currentRow, 4].Value?.ToString()))
                                             {
                                                 rowsToAdd++;
                                                 currentRow--;
@@ -245,6 +372,39 @@ namespace GoogleFormExporter
                                 }
                                 else
                                 {
+                                    currentRow = row - 1;
+                                    rowFinal = row;
+                                    rowsToAdd = 1;
+                                    //if (row % 55 == 0)
+                                    //{
+                                    //    while (!string.IsNullOrWhiteSpace(sheet.Cells[currentRow, 3].Value?.ToString()) || !string.IsNullOrWhiteSpace(sheet.Cells[currentRow, 2].Value?.ToString()) || !string.IsNullOrWhiteSpace(sheet.Cells[currentRow, 4].Value?.ToString()))
+                                    //    {
+                                    //        rowsToAdd++;
+                                    //        currentRow--;
+                                    //    }
+                                    //    sheet.InsertRow(currentRow + 1, rowsToAdd);
+                                    //    row = rowFinal + rowsToAdd;
+                                    //}
+                                    if (row % 56 == 0)
+                                    {
+                                        while (!string.IsNullOrWhiteSpace(sheet.Cells[currentRow, 3].Value?.ToString()) || !string.IsNullOrWhiteSpace(sheet.Cells[currentRow, 2].Value?.ToString()) || !string.IsNullOrWhiteSpace(sheet.Cells[currentRow, 4].Value?.ToString()))
+                                        {
+                                            rowsToAdd++;
+                                            currentRow--;
+                                        }
+                                        sheet.InsertRow(currentRow + 1, rowsToAdd);
+                                        row = rowFinal + rowsToAdd;
+                                    }
+                                    else if (row % 57 == 0)
+                                    {
+                                        while (!string.IsNullOrWhiteSpace(sheet.Cells[currentRow, 3].Value?.ToString()) || !string.IsNullOrWhiteSpace(sheet.Cells[currentRow, 2].Value?.ToString()) || !string.IsNullOrWhiteSpace(sheet.Cells[currentRow, 4].Value?.ToString()))
+                                        {
+                                            rowsToAdd++;
+                                            currentRow--;
+                                        }
+                                        sheet.InsertRow(currentRow + 1, rowsToAdd);
+                                        row = rowFinal + rowsToAdd;
+                                    }
                                     sheet.Cells[row, 1].Value = person.RoomNumber;
                                     sheet.Cells[row, 2].Value = person.Name;
                                     sheet.Cells[row, 3].Value = person.Food.Equals("NO ORDER FOR THIS DAY") ? "" : person.Food.Substring(0, person.Food.IndexOf(person.Food.ToCharArray().First(char.IsDigit))).Trim();
@@ -260,6 +420,45 @@ namespace GoogleFormExporter
                             row++;
                         }
                     }
+                    currentRow = row - 1;
+                    rowFinal = row;
+                    rowsToAdd = 1;
+                    //if (row % 55 == 0)
+                    //{
+                    //    while (!string.IsNullOrWhiteSpace(sheet.Cells[currentRow, 3].Value?.ToString()) || !string.IsNullOrWhiteSpace(sheet.Cells[currentRow, 2].Value?.ToString()) || !string.IsNullOrWhiteSpace(sheet.Cells[currentRow, 4].Value?.ToString()))
+                    //    {
+                    //        rowsToAdd++;
+                    //        currentRow--;
+                    //    }
+                    //    sheet.InsertRow(currentRow + 1, rowsToAdd);
+                    //    row = rowFinal + rowsToAdd;
+                    //}
+                    if (row % 56 == 0)
+                    {
+                        var a = !string.IsNullOrWhiteSpace(sheet.Cells[currentRow, 2].Value?.ToString()) ? sheet.Cells[currentRow, 2].Value?.ToString() : "";
+                        var b = !string.IsNullOrWhiteSpace(sheet.Cells[currentRow, 3].Value?.ToString()) ? sheet.Cells[currentRow, 3].Value?.ToString() : "";
+                        var c = !string.IsNullOrWhiteSpace(sheet.Cells[currentRow, 4].Value?.ToString()) ? sheet.Cells[currentRow, 4].Value?.ToString() : "";
+                        while (!string.IsNullOrWhiteSpace(sheet.Cells[currentRow, 3].Value?.ToString()) || !string.IsNullOrWhiteSpace(sheet.Cells[currentRow, 2].Value?.ToString()) || !string.IsNullOrWhiteSpace(sheet.Cells[currentRow, 4].Value?.ToString()))
+                        {
+                            rowsToAdd++;
+                            currentRow--;
+                        }
+                        sheet.InsertRow(currentRow + 1, rowsToAdd);
+                        row = rowFinal + rowsToAdd;
+                    }
+                    else if (row % 57 == 0)
+                    {
+                        var a = !string.IsNullOrWhiteSpace(sheet.Cells[currentRow, 2].Value?.ToString()) ? sheet.Cells[currentRow, 2].Value?.ToString() : "";
+                        var b = !string.IsNullOrWhiteSpace(sheet.Cells[currentRow, 3].Value?.ToString()) ? sheet.Cells[currentRow, 3].Value?.ToString() : "";
+                        var c = !string.IsNullOrWhiteSpace(sheet.Cells[currentRow, 4].Value?.ToString()) ? sheet.Cells[currentRow, 4].Value?.ToString() : "";
+                        while (!string.IsNullOrWhiteSpace(sheet.Cells[currentRow, 3].Value?.ToString()) || !string.IsNullOrWhiteSpace(sheet.Cells[currentRow, 2].Value?.ToString()) || !string.IsNullOrWhiteSpace(sheet.Cells[currentRow, 4].Value?.ToString()))
+                        {
+                            rowsToAdd++;
+                            currentRow--;
+                        }
+                        sheet.InsertRow(currentRow + 1, rowsToAdd);
+                        row = rowFinal + rowsToAdd;
+                    }
 
                     sheet.Cells[row, 4].Formula = "=SUM(D" + roomStart + ":D" + (row - 1) + ")";
                     sheet.Cells[row, 4].Style.Font.Color.SetColor(Color.White);
@@ -271,7 +470,7 @@ namespace GoogleFormExporter
                     sheet.Cells[row, 6].Style.Fill.BackgroundColor.SetColor(Color.Black);
                     var lastRow = row - 1;
                     row = 1;
-                    foreach (var food in foods.Select(x => x.Substring(0, x.IndexOf(x.ToCharArray().First(char.IsDigit)))).Distinct())
+                    foreach (var food in foods.Select(x => x.Substring(0, x.IndexOf(x.ToCharArray().First(char.IsDigit))).Trim()).Distinct())
                     {
                         var current = food;
                         var sum = foods.Where(x => x.Contains(food)).Select(x => int.Parse(x.Substring(x.IndexOf(x.ToCharArray().First(char.IsDigit)), 1))).Sum();
@@ -291,7 +490,7 @@ namespace GoogleFormExporter
                     sheet.PrinterSettings.RightMargin = decimal.Parse("0.24");
                     sheet.Column(1).AutoFit(0);
                     sheet.Column(1).Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
-                    sheet.Column(2).AutoFit(0);
+                    sheet.Column(2).Width = 24;
                     sheet.Column(3).AutoFit(0);
                     sheet.Column(3).Width = 40;
                     sheet.Column(4).AutoFit(0);
